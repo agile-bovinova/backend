@@ -9,12 +9,6 @@ using VacApp_Bovinova_Platform.Shared.Domain.Repositories;
 using VacApp_Bovinova_Platform.Shared.Infrastructure.Interfaces.ASAP.Configuration;
 using VacApp_Bovinova_Platform.Shared.Infrastructure.Persistence.EFC.Configuration;
 using VacApp_Bovinova_Platform.Shared.Infrastructure.Persistence.EFC.Repositories;
-using VacApp_Bovinova_Platform.StaffAdministration.Application.Internal.CommandServices;
-using VacApp_Bovinova_Platform.StaffAdministration.Application.Internal.QueryServices;
-using VacApp_Bovinova_Platform.StaffAdministration.Application.Internal.Services;
-using VacApp_Bovinova_Platform.StaffAdministration.Domain.Repositories;
-using VacApp_Bovinova_Platform.StaffAdministration.Domain.Services;
-using VacApp_Bovinova_Platform.StaffAdministration.Infrastructure.Persistence.EFC.Repositories;
 using VacApp_Bovinova_Platform.CampaignManagement.Application.Internal.CommandServices;
 using VacApp_Bovinova_Platform.CampaignManagement.Application.Internal.QueryServices;
 using VacApp_Bovinova_Platform.CampaignManagement.Domain.Repositories;
@@ -189,11 +183,6 @@ builder.Services.AddScoped<IProductCommandService, ProductCommandService>();
 builder.Services.AddScoped<IProductExpiryNotificationService, ProductExpiryNotificationService>();
 builder.Services.AddHostedService<ProductExpiryBackgroundService>();
 
-//Staff Administration BC
-builder.Services.AddScoped<IStaffRepository, StaffRepository>();
-builder.Services.AddScoped<IStaffQueryService, StaffQueryService>();
-builder.Services.AddScoped<IStaffCommandService, StaffCommandService>();
-builder.Services.AddScoped<IStaffAccessService, StaffAccessService>();
 
 //Campaign Management BC
 builder.Services.AddScoped<ICampaignRepository, CampaignRepository>();

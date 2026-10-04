@@ -7,7 +7,6 @@ using VacApp_Bovinova_Platform.AlertManagement.Interfaces.REST.Resources;
 using VacApp_Bovinova_Platform.AlertManagement.Interfaces.REST.Transform;
 using VacApp_Bovinova_Platform.IAM.Domain.Model.Aggregates;
 using VacApp_Bovinova_Platform.IAM.Infrastructure.Pipeline.Middleware.Attributes;
-using VacApp_Bovinova_Platform.StaffAdministration.Domain.Services;
 
 namespace VacApp_Bovinova_Platform.AlertManagement.Interfaces.REST;
 
@@ -17,8 +16,7 @@ namespace VacApp_Bovinova_Platform.AlertManagement.Interfaces.REST;
 [Produces(MediaTypeNames.Application.Json)]
 public class AlertController(
     IAlertCommandService commandService,
-    IAlertQueryService   queryService,
-    IStaffAccessService  staffAccessService)
+    IAlertQueryService   queryService)
     : ControllerBase
 {
     /// <summary>
@@ -32,7 +30,7 @@ public class AlertController(
         if (HttpContext.Items["User"] is not User user)
             return Unauthorized("User not found in context.");
 
-        var effectiveUserId = await staffAccessService.GetEffectiveUserIdAsync(user);
+        var effectiveUserId = user.Id;
 
         var alerts    = await queryService.Handle(new GetAlertsByUserIdQuery(effectiveUserId));
         var resources = alerts.Select(AlertResourceFromEntityAssembler.ToResourceFromEntity);
@@ -50,7 +48,7 @@ public class AlertController(
         if (HttpContext.Items["User"] is not User user)
             return Unauthorized("User not found in context.");
 
-        var effectiveUserId = await staffAccessService.GetEffectiveUserIdAsync(user);
+        var effectiveUserId = user.Id;
 
         var alert = await queryService.Handle(new GetAlertByIdQuery(alertId));
         // Return NotFound (not Forbidden) when the alert belongs to another user,
@@ -71,10 +69,7 @@ public class AlertController(
         if (HttpContext.Items["User"] is not User user)
             return Unauthorized("User not found in context.");
 
-        if (!await staffAccessService.CanEditAsync(user))
-            return StatusCode(StatusCodes.Status403Forbidden,
-                new { message = "Read-only staff cannot modify alerts." });
-        var effectiveUserId = await staffAccessService.GetEffectiveUserIdAsync(user);
+                var effectiveUserId = user.Id;
 
         // Verify ownership before mutating — prevents marking another user's alert as read.
         var existing = await queryService.Handle(new GetAlertByIdQuery(alertId));

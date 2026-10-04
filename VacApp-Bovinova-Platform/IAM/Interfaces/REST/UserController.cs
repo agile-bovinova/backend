@@ -12,9 +12,6 @@ using VacApp_Bovinova_Platform.IAM.Interfaces.REST.Resources.UserResources;
 using VacApp_Bovinova_Platform.IAM.Interfaces.REST.Transform;
 using VacApp_Bovinova_Platform.RanchManagement.Domain.Model.Queries;
 using VacApp_Bovinova_Platform.RanchManagement.Domain.Services;
-using VacApp_Bovinova_Platform.StaffAdministration.Domain.Model.Queries;
-using VacApp_Bovinova_Platform.StaffAdministration.Domain.Model.ValueObjects;
-using VacApp_Bovinova_Platform.StaffAdministration.Domain.Services;
 using VacApp_Bovinova_Platform.IAM.Interfaces.REST.Resources;
 
 
@@ -31,9 +28,7 @@ namespace VacApp_Bovinova_Platform.IAM.Interfaces.REST
         IBovineQueryService bovineQueryService,
         ICampaignQueryService campaignQueryService,
     IProductQueryService productQueryService,
-        IStaffQueryService staffQueryService,
-        IStableQueryService stableQueryService,
-        IStaffAccessService staffAccessService
+        IStableQueryService stableQueryService
         ) : ControllerBase
     {
         [HttpPost("sign-up")]
@@ -104,18 +99,12 @@ namespace VacApp_Bovinova_Platform.IAM.Interfaces.REST
             if (user is null)
                 return Unauthorized("User not found in context.");
 
-            // Resolve who the user operates as. Permissions are read from the DB
-            // (never from the JWT) so access changes apply without a new token.
-            // Throws 403 when the user is staff with inactive access.
-            var staffAccess = await staffAccessService.GetActiveStaffAccessAsync(user);
-            var isStaff = staffAccess is not null;
-            var effectiveUserId = staffAccess?.UserId ?? user.Id;
-            var owner = await staffAccessService.GetEffectiveOwnerAsync(user);
-
-            var accessLevel = staffAccess is null ? "Owner" : staffAccess.AccessLevel.ToString();
-            var canEdit = staffAccess is null || staffAccess.AccessLevel >= StaffAccessLevel.Editor;
-            var canManageStaff = staffAccess is null || staffAccess.AccessLevel == StaffAccessLevel.Manager;
-            var canManageSubscription = false;
+            var effectiveUserId = user.Id;
+            var accessLevel = "Owner";
+            var canEdit = true;
+            var isStaff = false;
+            var canManageStaff = true;
+            var totalStaff = 0;
 
             // Total de bovinos
             var bovines = await bovineQueryService.Handle(new GetAllBovinesQuery(effectiveUserId));
@@ -133,10 +122,6 @@ namespace VacApp_Bovinova_Platform.IAM.Interfaces.REST
             var products = await productQueryService.Handle(new GetProductsByUserIdQuery(effectiveUserId));
             var totalProducts = products.Sum(p => p.Quantity);
 
-            // Total de personal
-            var staff = await staffQueryService.Handle(new GetAllStaffQuery(effectiveUserId));
-            var totalStaff = staff.Count();
-
             // Próximas campañas
             var today = DateOnly.FromDateTime(DateTime.Now);
             var nextCampaigns = campaigns
@@ -144,8 +129,6 @@ namespace VacApp_Bovinova_Platform.IAM.Interfaces.REST
                     .Select(c => new CampaignInfoResource(c.Id, c.Name, c.StartDate, c.EndDate))
                     .ToArray();
 
-            // Build and return the response. subscriptionPlan is the effective
-            // owner's plan so staff of a Plus rancher keep Plus features unlocked.
             var resource = new UserInfoResource(
                     user.Id,
                     user.Username,

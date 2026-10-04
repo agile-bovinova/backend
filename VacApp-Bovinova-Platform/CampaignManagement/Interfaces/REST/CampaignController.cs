@@ -10,7 +10,6 @@ using VacApp_Bovinova_Platform.IAM.Domain.Model.Aggregates;
 using VacApp_Bovinova_Platform.IAM.Infrastructure.Pipeline.Middleware.Attributes;
 using VacApp_Bovinova_Platform.RanchManagement.Domain.Model.Queries;
 using VacApp_Bovinova_Platform.RanchManagement.Domain.Services;
-using VacApp_Bovinova_Platform.StaffAdministration.Domain.Services;
 
 namespace VacApp_Bovinova_Platform.CampaignManagement.Interfaces.REST;
 
@@ -21,7 +20,6 @@ namespace VacApp_Bovinova_Platform.CampaignManagement.Interfaces.REST;
 public class CampaignController(
     ICampaignCommandService campaignCommandService,
     ICampaignQueryService campaignQueryService,
-    IStaffAccessService staffAccessService,
     IStableQueryService stableQueryService,
     IBovineQueryService bovineQueryService)
     : ControllerBase
@@ -62,8 +60,7 @@ public class CampaignController(
         var user = HttpContext.Items["User"] as User;
         if (user is null) return Unauthorized("Usuario no encontrado en el contexto.");
 
-        if (!await staffAccessService.CanEditAsync(user)) return ForbiddenEdit();
-        var effectiveUserId = await staffAccessService.GetEffectiveUserIdAsync(user);
+                var effectiveUserId = user.Id;
 
         var createCampaignCommand = CreateCampaignCommandFromResourceAssembler.ToCommandFromResource(resource, effectiveUserId);
         var result = await campaignCommandService.Handle(createCampaignCommand);
@@ -83,7 +80,7 @@ public class CampaignController(
         var user = HttpContext.Items["User"] as User;
         if (user is null) return Unauthorized("Usuario no encontrado en el contexto.");
 
-        var effectiveUserId = await staffAccessService.GetEffectiveUserIdAsync(user);
+        var effectiveUserId = user.Id;
 
         var getCampaignByIdQuery = new GetCampaignByIdQuery(id);
         var result = await campaignQueryService.Handle(getCampaignByIdQuery);
@@ -103,7 +100,7 @@ public class CampaignController(
         var user = HttpContext.Items["User"] as User;
         if (user is null) return Unauthorized("Usuario no encontrado en el contexto.");
 
-        var effectiveUserId = await staffAccessService.GetEffectiveUserIdAsync(user);
+        var effectiveUserId = user.Id;
 
         var campaigns = await campaignQueryService.Handle(new GetAllCampaignsQuery(effectiveUserId));
         var stableNameMap = await GetStableNameMapAsync(effectiveUserId);
@@ -124,8 +121,7 @@ public class CampaignController(
         var user = HttpContext.Items["User"] as User;
         if (user is null) return Unauthorized("Usuario no encontrado en el contexto.");
 
-        if (!await staffAccessService.CanEditAsync(user)) return ForbiddenEdit();
-        var effectiveUserId = await staffAccessService.GetEffectiveUserIdAsync(user);
+                var effectiveUserId = user.Id;
 
         // Validación temprana antes de llegar al servicio.
         if (resource.EndDate < resource.StartDate)
@@ -156,8 +152,7 @@ public class CampaignController(
         var user = HttpContext.Items["User"] as User;
         if (user is null) return Unauthorized("Usuario no encontrado en el contexto.");
 
-        if (!await staffAccessService.CanEditAsync(user)) return ForbiddenEdit();
-        var effectiveUserId = await staffAccessService.GetEffectiveUserIdAsync(user);
+                var effectiveUserId = user.Id;
 
         var existing = await campaignQueryService.Handle(new GetCampaignByIdQuery(id));
         if (existing is null || existing.UserId != effectiveUserId)

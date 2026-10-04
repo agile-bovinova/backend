@@ -12,7 +12,6 @@ using VacApp_Bovinova_Platform.IAM.Domain.Model.Commands;
 using VacApp_Bovinova_Platform.RanchManagement.Domain.Model.Aggregates;
 using VacApp_Bovinova_Platform.RanchManagement.Domain.Model.Queries;
 using VacApp_Bovinova_Platform.RanchManagement.Domain.Services;
-using VacApp_Bovinova_Platform.StaffAdministration.Domain.Services;
 
 namespace VacApp.Tests.IntegrationTests
 {
@@ -20,8 +19,7 @@ namespace VacApp.Tests.IntegrationTests
     {
         private readonly Mock<ICampaignCommandService> _commandServiceMock;
         private readonly Mock<ICampaignQueryService> _queryServiceMock;
-        private readonly Mock<IStaffAccessService> _staffAccessMock;
-        private readonly Mock<IStableQueryService> _stableQueryServiceMock;
+                private readonly Mock<IStableQueryService> _stableQueryServiceMock;
         private readonly Mock<IBovineQueryService> _bovineQueryServiceMock;
         private readonly CampaignController _controller;
         private readonly User _user;
@@ -30,22 +28,19 @@ namespace VacApp.Tests.IntegrationTests
         {
             _commandServiceMock = new Mock<ICampaignCommandService>();
             _queryServiceMock = new Mock<ICampaignQueryService>();
-            _staffAccessMock = new Mock<IStaffAccessService>();
-            _stableQueryServiceMock = new Mock<IStableQueryService>();
+                        _stableQueryServiceMock = new Mock<IStableQueryService>();
             _bovineQueryServiceMock = new Mock<IBovineQueryService>();
 
             _user = new User(new SignUpCommand("usuario", "email@email.com", "pass"));
 
             // Default: owner with full access operating on its own data.
-            _staffAccessMock.Setup(x => x.CanEditAsync(It.IsAny<User>())).ReturnsAsync(true);
-            _staffAccessMock.Setup(x => x.GetEffectiveUserIdAsync(It.IsAny<User>())).ReturnsAsync((User u) => u.Id);
-
+                        
             // Name lookups used when building the campaign resource (no stables/bovines registered).
             _stableQueryServiceMock.Setup(x => x.Handle(It.IsAny<GetAllStablesQuery>())).ReturnsAsync(new List<Stable>());
             _bovineQueryServiceMock.Setup(x => x.Handle(It.IsAny<GetAllBovinesQuery>())).ReturnsAsync(new List<Bovine>());
 
             _controller = new CampaignController(
-                _commandServiceMock.Object, _queryServiceMock.Object, _staffAccessMock.Object,
+                _commandServiceMock.Object, _queryServiceMock.Object, 
                 _stableQueryServiceMock.Object, _bovineQueryServiceMock.Object);
             _controller.ControllerContext.HttpContext = new DefaultHttpContext();
             _controller.ControllerContext.HttpContext.Items["User"] = _user;

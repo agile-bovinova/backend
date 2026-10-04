@@ -10,7 +10,6 @@ using VacApp_Bovinova_Platform.RanchManagement.Interfaces.REST.Resources;
 using VacApp_Bovinova_Platform.RanchManagement.Interfaces.REST.Transform;
 using VacApp_Bovinova_Platform.IAM.Domain.Model.Aggregates;
 using VacApp_Bovinova_Platform.IAM.Domain.Model.Commands;
-using VacApp_Bovinova_Platform.StaffAdministration.Domain.Services;
 
 namespace VacApp.Tests.IntegrationTests
 {
@@ -20,8 +19,7 @@ namespace VacApp.Tests.IntegrationTests
         private readonly Mock<ICategoryQueryService> _categoryQueryServiceMock;
         private readonly Mock<IProductCommandService> _productCommandServiceMock;
         private readonly Mock<IProductQueryService> _productQueryServiceMock;
-        private readonly Mock<IStaffAccessService> _staffAccessMock;
-        private readonly InventoryController _controller;
+                private readonly InventoryController _controller;
         private readonly User _user;
 
         public InventoryControllerIntegrationTests()
@@ -30,21 +28,16 @@ namespace VacApp.Tests.IntegrationTests
             _categoryQueryServiceMock = new Mock<ICategoryQueryService>();
             _productCommandServiceMock = new Mock<IProductCommandService>();
             _productQueryServiceMock = new Mock<IProductQueryService>();
-            _staffAccessMock = new Mock<IStaffAccessService>();
-
+            
             _user = new User(new SignUpCommand("usuario", "email@email.com", "pass"));
 
             // Default: owner with full access operating on its own data.
-            _staffAccessMock.Setup(x => x.CanEditAsync(It.IsAny<User>())).ReturnsAsync(true);
-            _staffAccessMock.Setup(x => x.GetEffectiveUserIdAsync(It.IsAny<User>())).ReturnsAsync((User u) => u.Id);
-
+                        
             _controller = new InventoryController(
                 _categoryCommandServiceMock.Object,
                 _categoryQueryServiceMock.Object,
                 _productCommandServiceMock.Object,
-                _productQueryServiceMock.Object,
-                _staffAccessMock.Object
-            );
+                _productQueryServiceMock.Object);
 
             _controller.ControllerContext.HttpContext = new DefaultHttpContext();
             _controller.ControllerContext.HttpContext.Items["User"] = _user;

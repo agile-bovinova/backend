@@ -8,7 +8,6 @@ using VacApp_Bovinova_Platform.RanchManagement.Domain.Model.Queries;
 using VacApp_Bovinova_Platform.RanchManagement.Domain.Services;
 using VacApp_Bovinova_Platform.RanchManagement.Interfaces.REST.Resources;
 using VacApp_Bovinova_Platform.RanchManagement.Interfaces.REST.Transform;
-using VacApp_Bovinova_Platform.StaffAdministration.Domain.Services;
 
 namespace VacApp_Bovinova_Platform.RanchManagement.Interfaces.REST;
 
@@ -19,8 +18,7 @@ namespace VacApp_Bovinova_Platform.RanchManagement.Interfaces.REST;
 [Tags("Stables")]
 public class StableController(
    IStableCommandService commandService,
-   IStableQueryService queryService,
-   IStaffAccessService staffAccessService) : ControllerBase
+   IStableQueryService queryService) : ControllerBase
 {
     private ObjectResult ForbiddenEdit() =>
         StatusCode(StatusCodes.Status403Forbidden,
@@ -41,8 +39,7 @@ public class StableController(
         if (user is null)
             return Unauthorized("User not found in context.");
 
-        if (!await staffAccessService.CanEditAsync(user)) return ForbiddenEdit();
-        var effectiveUserId = await staffAccessService.GetEffectiveUserIdAsync(user);
+                var effectiveUserId = user.Id;
 
         var command = CreateStableCommandFromResourceAssembler.ToCommandFromResource(resource, effectiveUserId);
         var result = await commandService.Handle(command);
@@ -63,7 +60,7 @@ public class StableController(
         if (user is null)
             return Unauthorized("User not found in context.");
 
-        var effectiveUserId = await staffAccessService.GetEffectiveUserIdAsync(user);
+        var effectiveUserId = user.Id;
 
         var stables = await queryService.Handle(new GetAllStablesQuery(effectiveUserId));
         var stableResources = stables.Select(StableResourceFromEntityAssembler.ToResourceFromEntity);
@@ -77,7 +74,7 @@ public class StableController(
         if (user is null)
             return Unauthorized("User not found in context.");
 
-        var effectiveUserId = await staffAccessService.GetEffectiveUserIdAsync(user);
+        var effectiveUserId = user.Id;
 
         var getStableById = new GetStablesByIdQuery(id);
         var result = await queryService.Handle(getStableById);
@@ -94,8 +91,7 @@ public class StableController(
         if (user is null)
             return Unauthorized("User not found in context.");
 
-        if (!await staffAccessService.CanEditAsync(user)) return ForbiddenEdit();
-        var effectiveUserId = await staffAccessService.GetEffectiveUserIdAsync(user);
+                var effectiveUserId = user.Id;
 
         var existing = await queryService.Handle(new GetStablesByIdQuery(id));
         if (existing is null || existing.UserId != effectiveUserId) return NotFound();
@@ -115,8 +111,7 @@ public class StableController(
         if (user is null)
             return Unauthorized("User not found in context.");
 
-        if (!await staffAccessService.CanEditAsync(user)) return ForbiddenEdit();
-        var effectiveUserId = await staffAccessService.GetEffectiveUserIdAsync(user);
+                var effectiveUserId = user.Id;
 
         var existing = await queryService.Handle(new GetStablesByIdQuery(id));
         if (existing is null || existing.UserId != effectiveUserId)

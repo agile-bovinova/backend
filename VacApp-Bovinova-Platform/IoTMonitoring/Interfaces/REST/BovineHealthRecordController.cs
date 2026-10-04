@@ -6,7 +6,6 @@ using VacApp_Bovinova_Platform.IoTMonitoring.Domain.Model.Queries;
 using VacApp_Bovinova_Platform.IoTMonitoring.Domain.Services;
 using VacApp_Bovinova_Platform.IoTMonitoring.Interfaces.REST.Resources;
 using VacApp_Bovinova_Platform.IoTMonitoring.Interfaces.REST.Transform;
-using VacApp_Bovinova_Platform.StaffAdministration.Domain.Services;
 
 namespace VacApp_Bovinova_Platform.IoTMonitoring.Interfaces.REST;
 
@@ -15,8 +14,7 @@ namespace VacApp_Bovinova_Platform.IoTMonitoring.Interfaces.REST;
 [Route("api/v1/iot-monitoring")]
 [Produces(MediaTypeNames.Application.Json)]
 public class BovineHealthRecordController(
-    IBovineHealthRecordQueryService queryService,
-    IStaffAccessService staffAccessService)
+    IBovineHealthRecordQueryService queryService)
     : ControllerBase
 {
     // NOTE: telemetry ingestion is NOT exposed over HTTP. Per constraint CON2 the
@@ -34,7 +32,7 @@ public class BovineHealthRecordController(
         var user = HttpContext.Items["User"] as User;
         if (user is null) return Unauthorized("User not found in context.");
 
-        var effectiveUserId = await staffAccessService.GetEffectiveUserIdAsync(user);
+        var effectiveUserId = user.Id;
 
         var records = await queryService.Handle(new GetHealthRecordsByBovineIdQuery(bovineId, effectiveUserId));
         var resources = records.Select(BovineHealthRecordResourceFromEntityAssembler.ToResourceFromEntity);
@@ -53,7 +51,7 @@ public class BovineHealthRecordController(
         var user = HttpContext.Items["User"] as User;
         if (user is null) return Unauthorized("User not found in context.");
 
-        var effectiveUserId = await staffAccessService.GetEffectiveUserIdAsync(user);
+        var effectiveUserId = user.Id;
 
         var record = await queryService.Handle(new GetLatestHealthRecordByBovineIdQuery(bovineId, effectiveUserId));
         if (record is null) return NotFound();

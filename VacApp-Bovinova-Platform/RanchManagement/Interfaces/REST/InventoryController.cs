@@ -8,7 +8,6 @@ using VacApp_Bovinova_Platform.RanchManagement.Domain.Model.Queries;
 using VacApp_Bovinova_Platform.RanchManagement.Domain.Services;
 using VacApp_Bovinova_Platform.RanchManagement.Interfaces.REST.Resources;
 using VacApp_Bovinova_Platform.RanchManagement.Interfaces.REST.Transform;
-using VacApp_Bovinova_Platform.StaffAdministration.Domain.Services;
 
 namespace VacApp_Bovinova_Platform.RanchManagement.Interfaces.REST;
 
@@ -21,8 +20,7 @@ public class InventoryController(
     ICategoryCommandService categoryCommandService,
     ICategoryQueryService categoryQueryService,
     IProductCommandService productCommandService,
-    IProductQueryService productQueryService,
-    IStaffAccessService staffAccessService) : ControllerBase
+    IProductQueryService productQueryService) : ControllerBase
 {
     private ObjectResult ForbiddenEdit() =>
         StatusCode(StatusCodes.Status403Forbidden,
@@ -45,8 +43,7 @@ public class InventoryController(
         if (user is null)
             return Unauthorized("User not found in context.");
 
-        if (!await staffAccessService.CanEditAsync(user)) return ForbiddenEdit();
-        var effectiveUserId = await staffAccessService.GetEffectiveUserIdAsync(user);
+                var effectiveUserId = user.Id;
 
         var command = CreateCategoryCommandFromResourceAssembler.ToCommandFromResource(resource, effectiveUserId);
         var result = await categoryCommandService.Handle(command);
@@ -67,7 +64,7 @@ public class InventoryController(
         if (user is null)
             return Unauthorized("User not found in context.");
 
-        var effectiveUserId = await staffAccessService.GetEffectiveUserIdAsync(user);
+        var effectiveUserId = user.Id;
 
         var categories = await categoryQueryService.Handle(new GetCategoriesByUserIdQuery(effectiveUserId));
         var categoryResources = categories.Select(CategoryResourceFromEntityAssembler.ToResourceFromEntity);
@@ -85,7 +82,7 @@ public class InventoryController(
         if (user is null)
             return Unauthorized("User not found in context.");
 
-        var effectiveUserId = await staffAccessService.GetEffectiveUserIdAsync(user);
+        var effectiveUserId = user.Id;
 
         var getCategoryById = new GetCategoryByIdQuery(id);
         var result = await categoryQueryService.Handle(getCategoryById);
@@ -102,8 +99,7 @@ public class InventoryController(
         if (user is null)
             return Unauthorized("User not found in context.");
 
-        if (!await staffAccessService.CanEditAsync(user)) return ForbiddenEdit();
-        var effectiveUserId = await staffAccessService.GetEffectiveUserIdAsync(user);
+                var effectiveUserId = user.Id;
 
         var existing = await categoryQueryService.Handle(new GetCategoryByIdQuery(id));
         if (existing is null || existing.UserId != effectiveUserId)
@@ -128,8 +124,7 @@ public class InventoryController(
         if (user is null)
             return Unauthorized("User not found in context.");
 
-        if (!await staffAccessService.CanEditAsync(user)) return ForbiddenEdit();
-        var effectiveUserId = await staffAccessService.GetEffectiveUserIdAsync(user);
+                var effectiveUserId = user.Id;
 
         var existing = await categoryQueryService.Handle(new GetCategoryByIdQuery(id));
         if (existing is null || existing.UserId != effectiveUserId)
@@ -161,8 +156,7 @@ public class InventoryController(
         if (user is null)
             return Unauthorized("User not found in context.");
 
-        if (!await staffAccessService.CanEditAsync(user)) return ForbiddenEdit();
-        var effectiveUserId = await staffAccessService.GetEffectiveUserIdAsync(user);
+                var effectiveUserId = user.Id;
 
         var command = CreateProductCommandFromResourceAssembler.ToCommandFromResource(resource, effectiveUserId);
         var result = await productCommandService.Handle(command);
@@ -183,7 +177,7 @@ public class InventoryController(
         if (user is null)
             return Unauthorized("User not found in context.");
 
-        var effectiveUserId = await staffAccessService.GetEffectiveUserIdAsync(user);
+        var effectiveUserId = user.Id;
 
         var products = await productQueryService.Handle(new GetProductsByUserIdQuery(effectiveUserId));
         var productResources = products.Select(ProductResourceFromEntityAssembler.ToResourceFromEntity);
@@ -201,7 +195,7 @@ public class InventoryController(
         if (user is null)
             return Unauthorized("User not found in context.");
 
-        var effectiveUserId = await staffAccessService.GetEffectiveUserIdAsync(user);
+        var effectiveUserId = user.Id;
 
         var getProductById = new GetProductByIdQuery(id);
         var result = await productQueryService.Handle(getProductById);
@@ -218,8 +212,7 @@ public class InventoryController(
         if (user is null)
             return Unauthorized("User not found in context.");
 
-        if (!await staffAccessService.CanEditAsync(user)) return ForbiddenEdit();
-        var effectiveUserId = await staffAccessService.GetEffectiveUserIdAsync(user);
+                var effectiveUserId = user.Id;
 
         var existing = await productQueryService.Handle(new GetProductByIdQuery(id));
         if (existing is null || existing.UserId != effectiveUserId)
@@ -244,8 +237,7 @@ public class InventoryController(
         if (user is null)
             return Unauthorized("User not found in context.");
 
-        if (!await staffAccessService.CanEditAsync(user)) return ForbiddenEdit();
-        var effectiveUserId = await staffAccessService.GetEffectiveUserIdAsync(user);
+                var effectiveUserId = user.Id;
 
         var existing = await productQueryService.Handle(new GetProductByIdQuery(id));
         if (existing is null || existing.UserId != effectiveUserId)

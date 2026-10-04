@@ -9,7 +9,6 @@ using VacApp_Bovinova_Platform.IoTMonitoring.Domain.Model.Queries;
 using VacApp_Bovinova_Platform.IoTMonitoring.Domain.Services;
 using VacApp_Bovinova_Platform.IoTMonitoring.Interfaces.REST.Resources;
 using VacApp_Bovinova_Platform.IoTMonitoring.Interfaces.REST.Transform;
-using VacApp_Bovinova_Platform.StaffAdministration.Domain.Services;
 
 namespace VacApp_Bovinova_Platform.IoTMonitoring.Interfaces.REST;
 
@@ -25,8 +24,7 @@ namespace VacApp_Bovinova_Platform.IoTMonitoring.Interfaces.REST;
 public class CollarController(
     ICollarCommandService commandService,
     ICollarQueryService queryService,
-    IBovineHealthRecordQueryService healthRecordQueryService,
-    IStaffAccessService staffAccessService)
+    IBovineHealthRecordQueryService healthRecordQueryService)
     : ControllerBase
 {
     private ObjectResult ForbiddenEdit() =>
@@ -43,8 +41,7 @@ public class CollarController(
         var user = HttpContext.Items["User"] as User;
         if (user is null) return Unauthorized("User not found in context.");
 
-        if (!await staffAccessService.CanEditAsync(user)) return ForbiddenEdit();
-        var effectiveUserId = await staffAccessService.GetEffectiveUserIdAsync(user);
+                var effectiveUserId = user.Id;
 
         try
         {
@@ -71,7 +68,7 @@ public class CollarController(
         var user = HttpContext.Items["User"] as User;
         if (user is null) return Unauthorized("User not found in context.");
 
-        var effectiveUserId = await staffAccessService.GetEffectiveUserIdAsync(user);
+        var effectiveUserId = user.Id;
 
         var collars = await queryService.Handle(new GetCollarsByUserIdQuery(effectiveUserId));
 
@@ -105,7 +102,7 @@ public class CollarController(
         var user = HttpContext.Items["User"] as User;
         if (user is null) return Unauthorized("User not found in context.");
 
-        var effectiveUserId = await staffAccessService.GetEffectiveUserIdAsync(user);
+        var effectiveUserId = user.Id;
 
         var active = await queryService.GetActiveCountAsync(effectiveUserId);
         var allowance = 999;
@@ -123,8 +120,7 @@ public class CollarController(
         var user = HttpContext.Items["User"] as User;
         if (user is null) return Unauthorized("User not found in context.");
 
-        if (!await staffAccessService.CanEditAsync(user)) return ForbiddenEdit();
-        var effectiveUserId = await staffAccessService.GetEffectiveUserIdAsync(user);
+                var effectiveUserId = user.Id;
 
         try
         {
@@ -148,8 +144,7 @@ public class CollarController(
         var user = HttpContext.Items["User"] as User;
         if (user is null) return Unauthorized("User not found in context.");
 
-        if (!await staffAccessService.CanEditAsync(user)) return ForbiddenEdit();
-        var effectiveUserId = await staffAccessService.GetEffectiveUserIdAsync(user);
+                var effectiveUserId = user.Id;
 
         try
         {

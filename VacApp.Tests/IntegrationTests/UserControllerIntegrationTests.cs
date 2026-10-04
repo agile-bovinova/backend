@@ -8,13 +8,10 @@ using VacApp_Bovinova_Platform.IAM.Interfaces.REST.Resources.UserResources;
 using VacApp_Bovinova_Platform.IAM.Domain.Model.Commands;
 using VacApp_Bovinova_Platform.RanchManagement.Domain.Services;
 using VacApp_Bovinova_Platform.CampaignManagement.Domain.Services;
-using VacApp_Bovinova_Platform.StaffAdministration.Domain.Services;
 using VacApp_Bovinova_Platform.RanchManagement.Domain.Model.Aggregates;
 using VacApp_Bovinova_Platform.RanchManagement.Domain.Model.Queries;
 using VacApp_Bovinova_Platform.CampaignManagement.Domain.Model.Aggregates;
 using VacApp_Bovinova_Platform.CampaignManagement.Domain.Model.Queries;
-using VacApp_Bovinova_Platform.StaffAdministration.Domain.Model.Aggregates;
-using VacApp_Bovinova_Platform.StaffAdministration.Domain.Model.Queries;
 using VacApp_Bovinova_Platform.IAM.Domain.Model.Queries;
 
 namespace VacApp.Tests.IntegrationTests
@@ -26,10 +23,8 @@ namespace VacApp.Tests.IntegrationTests
         private readonly Mock<IBovineQueryService> _bovineQueryMock;
         private readonly Mock<ICampaignQueryService> _campaignQueryMock;
         private readonly Mock<IProductQueryService> _productQueryMock;
-        private readonly Mock<IStaffQueryService> _staffQueryMock;
-        private readonly Mock<IStableQueryService> _stableQueryMock;
-        private readonly Mock<IStaffAccessService> _staffAccessMock;
-        private readonly UserController _controller;
+                private readonly Mock<IStableQueryService> _stableQueryMock;
+                private readonly UserController _controller;
 
         public UserControllerIntegrationTests()
         {
@@ -38,30 +33,18 @@ namespace VacApp.Tests.IntegrationTests
             _bovineQueryMock = new Mock<IBovineQueryService>();
             _campaignQueryMock = new Mock<ICampaignQueryService>();
             _productQueryMock = new Mock<IProductQueryService>();
-            _staffQueryMock = new Mock<IStaffQueryService>();
-            _stableQueryMock = new Mock<IStableQueryService>();
-            _staffAccessMock = new Mock<IStaffAccessService>();
-
+                        _stableQueryMock = new Mock<IStableQueryService>();
+            
             // Default: the authenticated user is an owner (not staff) with full access.
-            _staffAccessMock.Setup(x => x.GetActiveStaffAccessAsync(It.IsAny<User>())).ReturnsAsync((Staff?)null);
-            _staffAccessMock.Setup(x => x.GetEffectiveUserIdAsync(It.IsAny<User>())).ReturnsAsync((User u) => u.Id);
-            _staffAccessMock.Setup(x => x.GetEffectiveOwnerAsync(It.IsAny<User>())).ReturnsAsync((User u) => u);
-            _staffAccessMock.Setup(x => x.IsStaffAsync(It.IsAny<User>())).ReturnsAsync(false);
-            _staffAccessMock.Setup(x => x.IsOwnerAsync(It.IsAny<User>())).ReturnsAsync(true);
-            _staffAccessMock.Setup(x => x.CanReadAsync(It.IsAny<User>())).ReturnsAsync(true);
-            _staffAccessMock.Setup(x => x.CanEditAsync(It.IsAny<User>())).ReturnsAsync(true);
-            _staffAccessMock.Setup(x => x.CanManageStaffAsync(It.IsAny<User>())).ReturnsAsync(true);
-
+                                                                                                
             _controller = new UserController(
                 _commandServiceMock.Object,
                 _queryServiceMock.Object,
                 _bovineQueryMock.Object,
                 _campaignQueryMock.Object,
                 _productQueryMock.Object,
-                _staffQueryMock.Object,
-                _stableQueryMock.Object,
-                _staffAccessMock.Object
-            );
+                
+                _stableQueryMock.Object);
         }
 
         [Fact]
@@ -145,8 +128,7 @@ namespace VacApp.Tests.IntegrationTests
             _stableQueryMock.Setup(x => x.Handle(It.IsAny<GetAllStablesQuery>())).ReturnsAsync(new List<Stable>());
             _campaignQueryMock.Setup(x => x.Handle(It.IsAny<GetAllCampaignsQuery>())).ReturnsAsync(new List<Campaign>());
             _productQueryMock.Setup(x => x.Handle(It.IsAny<GetProductsByUserIdQuery>())).ReturnsAsync(new List<Product>());
-            _staffQueryMock.Setup(x => x.Handle(It.IsAny<GetAllStaffQuery>())).ReturnsAsync(new List<Staff>());
-
+            
             // Act
             var result = await _controller.GetInfo();
 

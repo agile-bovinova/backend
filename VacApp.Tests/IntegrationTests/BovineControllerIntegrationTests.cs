@@ -10,7 +10,6 @@ using VacApp_Bovinova_Platform.RanchManagement.Interfaces.REST.Resources;
 using VacApp_Bovinova_Platform.RanchManagement.Interfaces.REST.Transform;
 using VacApp_Bovinova_Platform.IAM.Domain.Model.Aggregates;
 using VacApp_Bovinova_Platform.IAM.Domain.Model.Commands;
-using VacApp_Bovinova_Platform.StaffAdministration.Domain.Services;
 
 namespace VacApp.Tests.IntegrationTests
 {
@@ -19,8 +18,7 @@ namespace VacApp.Tests.IntegrationTests
         private readonly Mock<IBovineCommandService> _commandServiceMock;
         private readonly Mock<IBovineQueryService> _queryServiceMock;
         private readonly Mock<IBovineBreedCommandService> _breedCommandServiceMock;
-        private readonly Mock<IStaffAccessService> _staffAccessMock;
-        private readonly BovineController _controller;
+                private readonly BovineController _controller;
         private readonly User _user;
 
         public BovineControllerIntegrationTests()
@@ -28,17 +26,14 @@ namespace VacApp.Tests.IntegrationTests
             _commandServiceMock = new Mock<IBovineCommandService>();
             _queryServiceMock = new Mock<IBovineQueryService>();
             _breedCommandServiceMock = new Mock<IBovineBreedCommandService>();
-            _staffAccessMock = new Mock<IStaffAccessService>();
-
+            
             _user = new User(new SignUpCommand("usuario", "email@email.com", "pass"));
 
             // Default: owner with full access operating on its own data.
-            _staffAccessMock.Setup(x => x.CanEditAsync(It.IsAny<User>())).ReturnsAsync(true);
-            _staffAccessMock.Setup(x => x.GetEffectiveUserIdAsync(It.IsAny<User>())).ReturnsAsync((User u) => u.Id);
-
+                        
             _controller = new BovineController(
                 _commandServiceMock.Object, _queryServiceMock.Object,
-                _breedCommandServiceMock.Object, _staffAccessMock.Object);
+                _breedCommandServiceMock.Object);
             _controller.ControllerContext.HttpContext = new DefaultHttpContext();
             _controller.ControllerContext.HttpContext.Items["User"] = _user;
         }
