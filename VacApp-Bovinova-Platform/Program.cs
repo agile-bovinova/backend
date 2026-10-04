@@ -62,16 +62,6 @@ using VacApp_Bovinova_Platform.SubscriptionManagement.Infrastructure.Email;
 using VacApp_Bovinova_Platform.SubscriptionManagement.Infrastructure.PaymentGateway;
 using VacApp_Bovinova_Platform.SubscriptionManagement.Infrastructure.Reminders;
 using VacApp_Bovinova_Platform.Shared.Infrastructure.Media.Local;
-using VacApp_Bovinova_Platform.AIAssistant.Domain.Repositories;
-using VacApp_Bovinova_Platform.AIAssistant.Domain.Services;
-using VacApp_Bovinova_Platform.AIAssistant.Application.ACL;
-using VacApp_Bovinova_Platform.AIAssistant.Application.Internal.CommandServices;
-using VacApp_Bovinova_Platform.AIAssistant.Application.Internal.QueryServices;
-using VacApp_Bovinova_Platform.AIAssistant.Infrastructure.ACL;
-using VacApp_Bovinova_Platform.AIAssistant.Infrastructure.AI.Clients;
-using VacApp_Bovinova_Platform.AIAssistant.Infrastructure.AI.Configuration;
-using VacApp_Bovinova_Platform.AIAssistant.Infrastructure.AI.Services;
-using VacApp_Bovinova_Platform.AIAssistant.Infrastructure.Persistence.EFC.Repositories;
 
 DotEnv.Load();
 
@@ -287,27 +277,6 @@ builder.Services.AddScoped<IAlertQueryService, AlertQueryService>();
 //MediatR — scans all handlers in this assembly
 builder.Services.AddMediatR(cfg =>
     cfg.RegisterServicesFromAssembly(typeof(Program).Assembly));
-
-//AI Assistant BC
-builder.Services.Configure<LocalModelSettings>(options =>
-{
-    var configuredSettings = builder.Configuration.GetSection("LocalModelSettings").Get<LocalModelSettings>() ??
-                             new LocalModelSettings();
-    options.BaseUrl = Environment.GetEnvironmentVariable("LM_STUDIO_BASE_URL") ?? configuredSettings.BaseUrl;
-    options.Model = Environment.GetEnvironmentVariable("LM_STUDIO_MODEL") ?? configuredSettings.Model;
-    options.ApiKey = Environment.GetEnvironmentVariable("LM_STUDIO_API_KEY") ?? configuredSettings.ApiKey;
-    options.Temperature = configuredSettings.Temperature;
-});
-builder.Services.AddHttpClient<ILocalModelClient, OpenAICompatibleModelClient>();
-builder.Services.AddScoped<IAIChatService, LmStudioChatService>();
-builder.Services.AddScoped<IAIVisionService, LmStudioVisionService>();
-builder.Services.AddScoped<IAISessionRepository, AISessionRepository>();
-builder.Services.AddScoped<IBovineAnalysisRepository, BovineAnalysisRepository>();
-builder.Services.AddScoped<IRanchContextFacade, RanchContextFacade>();
-builder.Services.AddScoped<IAlertContextFacade, AlertContextFacade>();
-builder.Services.AddScoped<IIoTContextFacade, IoTContextFacade>();
-builder.Services.AddScoped<IAIAssistantCommandService, AIAssistantCommandService>();
-builder.Services.AddScoped<IAIAssistantQueryService, AIAssistantQueryService>();
 
 
 /////////////////////////End Database Configuration/////////////////////////

@@ -35,7 +35,7 @@ namespace VacApp.Tests.UnitTests
         public async Task Handler_RaisesCollarReturnAlert_FromEvent()
         {
             var commandService = new Mock<IAlertCommandService>();
-            var handler = new SubscriptionEndedHandler(commandService.Object);
+            var handler = new SubscriptionEndedHandler(commandService.Object, null!, null!);
 
             await handler.Handle(new SubscriptionEndedEvent(UserId: 42, CollarCount: 2), CancellationToken.None);
 

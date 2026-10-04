@@ -12,7 +12,6 @@ using VacApp_Bovinova_Platform.SubscriptionManagement.Domain.Model.Aggregates;
 using VacApp_Bovinova_Platform.AlertManagement.Domain.Model.Aggregates;
 using VacApp_Bovinova_Platform.AlertManagement.Domain.Model.ValueObjects;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using VacApp_Bovinova_Platform.AIAssistant.Domain.Model.Entities;
 using VacApp_Bovinova_Platform.RanchManagement.Domain.Model.Entities;
 
 namespace VacApp_Bovinova_Platform.Shared.Infrastructure.Persistence.EFC.Configuration;
@@ -31,9 +30,6 @@ public class AppDbContext : DbContext
     public DbSet<AdditionalCollarRequest> AdditionalCollarRequests { get; set; }
     public DbSet<Payment> Payments { get; set; }
     public DbSet<Alert> Alerts { get; set; }
-    public DbSet<GeneralChatSession> GeneralChatSessions { get; set; }
-    public DbSet<BovineChatSession> BovineChatSessions { get; set; }
-    public DbSet<BovineAnalysis> BovineAnalyses { get; set; }
     public DbSet<BovineBreed> BovineBreeds { get; set; }
     public DbSet<CampaignStable> CampaignStables { get; set; }
     public DbSet<CampaignBovine> CampaignBovines { get; set; }
@@ -273,35 +269,11 @@ public class AppDbContext : DbContext
         builder.Entity<Alert>().Property(a => a.Message).IsRequired().HasMaxLength(500);
         builder.Entity<Alert>().Property(a => a.CreatedAt).IsRequired().HasColumnName("created_at");
 
-        /* AI Assistant */
         // General Chat Session
-        builder.Entity<GeneralChatSession>().HasKey(s => s.Id);
-        builder.Entity<GeneralChatSession>().Property(s => s.Id).IsRequired().ValueGeneratedOnAdd();
-        builder.Entity<GeneralChatSession>().Property(s => s.UserId).IsRequired().HasColumnName("user_id");
-        builder.Entity<GeneralChatSession>().Property(s => s.MessagesJson).IsRequired().HasColumnType("text");
-        builder.Entity<GeneralChatSession>().Property(s => s.CreatedAt).IsRequired();
-        builder.Entity<GeneralChatSession>().Property(s => s.UpdatedAt).IsRequired();
 
         // Bovine Chat Session
-        builder.Entity<BovineChatSession>().HasKey(s => s.Id);
-        builder.Entity<BovineChatSession>().Property(s => s.Id).IsRequired().ValueGeneratedOnAdd();
-        builder.Entity<BovineChatSession>().Property(s => s.UserId).IsRequired().HasColumnName("user_id");
-        builder.Entity<BovineChatSession>().Property(s => s.BovineId).IsRequired().HasColumnName("bovine_id");
-        builder.Entity<BovineChatSession>().Property(s => s.MessagesJson).IsRequired().HasColumnType("text");
-        builder.Entity<BovineChatSession>().Property(s => s.CreatedAt).IsRequired();
-        builder.Entity<BovineChatSession>().Property(s => s.UpdatedAt).IsRequired();
 
         // Bovine Analysis
-        builder.Entity<BovineAnalysis>().HasKey(a => a.Id);
-        builder.Entity<BovineAnalysis>().Property(a => a.Id).IsRequired().ValueGeneratedOnAdd();
-        builder.Entity<BovineAnalysis>().Property(a => a.UserId).IsRequired().HasColumnName("user_id");
-        builder.Entity<BovineAnalysis>().Property(a => a.BovineId).IsRequired().HasColumnName("bovine_id");
-        builder.Entity<BovineAnalysis>().Property(a => a.Score).IsRequired();
-        builder.Entity<BovineAnalysis>().Property(a => a.VisibleIssues).IsRequired().HasColumnType("text");
-        builder.Entity<BovineAnalysis>().Property(a => a.UrgencyLevel).IsRequired();
-        builder.Entity<BovineAnalysis>().Property(a => a.Recommendation).IsRequired().HasColumnType("text");
-        builder.Entity<BovineAnalysis>().Property(a => a.Confidence).IsRequired();
-        builder.Entity<BovineAnalysis>().Property(a => a.CreatedAt).IsRequired();
 
         builder.UseSnakeCaseNamingConvention();
     }
