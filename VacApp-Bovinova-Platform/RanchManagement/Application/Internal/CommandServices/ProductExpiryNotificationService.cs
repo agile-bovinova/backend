@@ -4,7 +4,7 @@ using VacApp_Bovinova_Platform.RanchManagement.Application.Outbound;
 using VacApp_Bovinova_Platform.RanchManagement.Domain.Repositories;
 using VacApp_Bovinova_Platform.RanchManagement.Domain.Services;
 using VacApp_Bovinova_Platform.Shared.Domain.Repositories;
-using VacApp_Bovinova_Platform.SubscriptionManagement.Application.Outbound;
+using VacApp_Bovinova_Platform.Shared.Application.Outbound;
 
 namespace VacApp_Bovinova_Platform.RanchManagement.Application.Internal.CommandServices;
 

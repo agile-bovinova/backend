@@ -8,7 +8,6 @@ using VacApp_Bovinova_Platform.IAM.Domain.Model.Aggregates;
 using VacApp_Bovinova_Platform.CampaignManagement.Domain.Model.Aggregates;
 using VacApp_Bovinova_Platform.CampaignManagement.Domain.Model.Entities;
 using VacApp_Bovinova_Platform.IoTMonitoring.Domain.Model.Aggregates;
-using VacApp_Bovinova_Platform.SubscriptionManagement.Domain.Model.Aggregates;
 using VacApp_Bovinova_Platform.AlertManagement.Domain.Model.Aggregates;
 using VacApp_Bovinova_Platform.AlertManagement.Domain.Model.ValueObjects;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
@@ -26,9 +25,6 @@ public class AppDbContext : DbContext
     public DbSet<Product> Products { get; set; }
     public DbSet<BovineHealthRecord> BovineHealthRecords { get; set; }
     public DbSet<Collar> Collars { get; set; }
-    public DbSet<Subscription> Subscriptions { get; set; }
-    public DbSet<AdditionalCollarRequest> AdditionalCollarRequests { get; set; }
-    public DbSet<Payment> Payments { get; set; }
     public DbSet<Alert> Alerts { get; set; }
     public DbSet<BovineBreed> BovineBreeds { get; set; }
     public DbSet<CampaignStable> CampaignStables { get; set; }
@@ -218,46 +214,6 @@ public class AppDbContext : DbContext
             .HasForeignKey(c => c.BovineId)
             .OnDelete(DeleteBehavior.Cascade);
 
-        /* Subscription Management */
-        builder.Entity<Subscription>().HasKey(s => s.Id);
-        builder.Entity<Subscription>().Property(s => s.Id).IsRequired().ValueGeneratedOnAdd();
-        builder.Entity<Subscription>().Property(s => s.UserId).IsRequired().HasColumnName("user_id");
-        builder.Entity<Subscription>().Property(s => s.Plan).IsRequired()
-            .HasConversion<string>().HasColumnName("plan");
-        builder.Entity<Subscription>().Property(s => s.Status).IsRequired()
-            .HasConversion<string>().HasColumnName("status");
-        builder.Entity<Subscription>().Property(s => s.StartDate).HasColumnName("start_date");
-        builder.Entity<Subscription>().Property(s => s.NextRenewal).HasColumnName("next_renewal");
-        builder.Entity<Subscription>().HasIndex(s => s.UserId).IsUnique();
-
-        // AdditionalCollarRequest
-        builder.Entity<AdditionalCollarRequest>().HasKey(r => r.Id);
-        builder.Entity<AdditionalCollarRequest>().Property(r => r.Id).IsRequired().ValueGeneratedOnAdd();
-        builder.Entity<AdditionalCollarRequest>().Property(r => r.UserId).IsRequired().HasColumnName("user_id");
-        builder.Entity<AdditionalCollarRequest>().Property(r => r.Status).IsRequired()
-            .HasConversion<string>().HasColumnName("status");
-        builder.Entity<AdditionalCollarRequest>().Property(r => r.MonthlyAmount).IsRequired().HasColumnName("monthly_amount");
-        builder.Entity<AdditionalCollarRequest>().Property(r => r.RequestedAt).IsRequired().HasColumnName("requested_at");
-
-        // Payment (gateway billing history)
-        builder.Entity<Payment>().HasKey(p => p.Id);
-        builder.Entity<Payment>().Property(p => p.Id).IsRequired().ValueGeneratedOnAdd();
-        builder.Entity<Payment>().Property(p => p.UserId).IsRequired().HasColumnName("user_id");
-        builder.Entity<Payment>().Property(p => p.Concept).IsRequired()
-            .HasConversion<string>().HasColumnName("concept");
-        builder.Entity<Payment>().Property(p => p.Amount).IsRequired().HasColumnName("amount");
-        builder.Entity<Payment>().Property(p => p.Currency).IsRequired().HasColumnName("currency");
-        builder.Entity<Payment>().Property(p => p.Status).IsRequired()
-            .HasConversion<string>().HasColumnName("status");
-        builder.Entity<Payment>().Property(p => p.ProviderRef).HasColumnName("provider_ref");
-        builder.Entity<Payment>().Property(p => p.IdempotencyKey).IsRequired().HasColumnName("idempotency_key");
-        builder.Entity<Payment>().Property(p => p.PaidAt).HasColumnName("paid_at");
-        builder.Entity<Payment>().HasIndex(p => p.IdempotencyKey).IsUnique();
-        builder.Entity<Payment>().HasIndex(p => p.ProviderRef);
-
-        /* Alert Management */
-        builder.Entity<Alert>().HasKey(a => a.Id);
-        builder.Entity<Alert>().Property(a => a.Id).IsRequired().ValueGeneratedOnAdd();
         builder.Entity<Alert>().Property(a => a.BovineId).HasColumnName("bovine_id"); // nullable: account-level alerts (CollarReturn) have no bovine
         builder.Entity<Alert>().Property(a => a.UserId).IsRequired().HasColumnName("user_id");
         builder.Entity<Alert>().Property(a => a.AlertType).IsRequired()

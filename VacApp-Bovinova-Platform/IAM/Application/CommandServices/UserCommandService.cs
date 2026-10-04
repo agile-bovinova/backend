@@ -6,7 +6,7 @@ using VacApp_Bovinova_Platform.IAM.Domain.Repositories;
 using VacApp_Bovinova_Platform.IAM.Domain.Services;
 using VacApp_Bovinova_Platform.Shared.Domain.Model.Exceptions;
 using VacApp_Bovinova_Platform.Shared.Domain.Repositories;
-using VacApp_Bovinova_Platform.SubscriptionManagement.Application.Outbound;
+using VacApp_Bovinova_Platform.Shared.Application.Outbound;
 
 namespace VacApp_Bovinova_Platform.IAM.Application.CommandServices
 {
@@ -77,17 +77,6 @@ namespace VacApp_Bovinova_Platform.IAM.Application.CommandServices
                 Console.WriteLine(e.Message);
                 return null;
             }
-        }
-
-        public async Task<User?> Handle(ChangeSubscriptionCommand command)
-        {
-            var user = await userRepository.FindByIdAsync(command.Id);
-            if (user == null)
-                return null;
-
-            user.ChangeSubscription(command.SubscriptionPlan);
-            await unitOfWork.CompleteAsync();
-            return user;
         }
 
         public async Task Handle(RequestPasswordResetCommand command)

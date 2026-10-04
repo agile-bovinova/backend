@@ -11,7 +11,6 @@ using VacApp_Bovinova_Platform.StaffAdministration.Domain.Services;
 namespace VacApp_Bovinova_Platform.IoTMonitoring.Interfaces.REST;
 
 [Authorize]
-[RequiresPlus]
 [ApiController]
 [Route("api/v1/iot-monitoring")]
 [Produces(MediaTypeNames.Application.Json)]

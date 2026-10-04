@@ -1,0 +1,17 @@
+            var resource = new UserInfoResource(
+                    user.Id,
+                    user.Username,
+                    user.Email,
+                    isStaff,
+                    effectiveUserId,
+                    accessLevel,
+                    true,
+                    canEdit,
+                    canManageStaff,
+                    totalBovines,
+                    totalCampaigns,
+                    totalStaff,
+                    totalProducts,
+                    totalStables,
+                    nextCampaigns
+            );

@@ -1,0 +1,13 @@
+            var expected = new UserInfoResource(
+                user.Id,
+                user.Username,
+                user.Email,
+                false,
+                user.Id,
+                "Owner",
+                true,
+                true,
+                true,
+                0, 0, 0, 0, 0,
+                Array.Empty<CampaignInfoResource>()
+            );

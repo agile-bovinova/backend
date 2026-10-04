@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using VacApp_Bovinova_Platform.IAM.Domain.Model.Aggregates;
 using VacApp_Bovinova_Platform.IAM.Infrastructure.Pipeline.Middleware.Attributes;
-using VacApp_Bovinova_Platform.IoTMonitoring.Application.ACL;
 using VacApp_Bovinova_Platform.IoTMonitoring.Domain.Model;
 using VacApp_Bovinova_Platform.IoTMonitoring.Domain.Model.Commands;
 using VacApp_Bovinova_Platform.IoTMonitoring.Domain.Model.Queries;
@@ -16,11 +15,9 @@ namespace VacApp_Bovinova_Platform.IoTMonitoring.Interfaces.REST;
 
 /// <summary>
 /// Collar registration, status and capacity. The whole controller requires the
-/// Plus plan ([RequiresPlus], resolved against the effective owner); Free users
 /// have no access to collars at all.
 /// </summary>
 [Authorize]
-[RequiresPlus]
 [ApiController]
 [Route("api/v1/iot-monitoring/collars")]
 [Produces(MediaTypeNames.Application.Json)]
@@ -28,7 +25,6 @@ namespace VacApp_Bovinova_Platform.IoTMonitoring.Interfaces.REST;
 public class CollarController(
     ICollarCommandService commandService,
     ICollarQueryService queryService,
-    ISubscriptionContextFacade subscriptionContext,
     IBovineHealthRecordQueryService healthRecordQueryService,
     IStaffAccessService staffAccessService)
     : ControllerBase
@@ -112,7 +108,7 @@ public class CollarController(
         var effectiveUserId = await staffAccessService.GetEffectiveUserIdAsync(user);
 
         var active = await queryService.GetActiveCountAsync(effectiveUserId);
-        var allowance = await subscriptionContext.GetCollarAllowanceAsync(effectiveUserId);
+        var allowance = 999;
         return Ok(new CollarCapacityResource(active, allowance, Math.Max(0, allowance - active)));
     }
 

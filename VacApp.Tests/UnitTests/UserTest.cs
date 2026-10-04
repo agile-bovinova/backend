@@ -27,7 +27,7 @@ namespace VacApp.Tests.UnitTests
             var command = new SignUpCommand("usuario2", "email_invalido", "password123");
 
             // Act & Assert
-            Assert.Throws<ArgumentException>(() => new User(command));
+            Assert.Throws<VacApp_Bovinova_Platform.Shared.Domain.Model.Exceptions.ValidationException>(() => new User(command));
         }
 
         [Fact]
@@ -77,31 +77,5 @@ namespace VacApp.Tests.UnitTests
             Assert.Equal("usuario5", user.Username);
             Assert.Equal("passwordActualizada", user.Password);
         }
-
-        [Fact]
-        public void NewUser_DefaultsToFreePlan()
-        {
-            var user = new User(new SignUpCommand("usuario6", "usuario6@email.com", "password123"));
-
-            Assert.Equal("Free", user.SubscriptionPlan);
-        }
-
-        [Fact]
-        public void ChangeSubscription_ToPlus()
-        {
-            var user = new User(new SignUpCommand("usuario7", "usuario7@email.com", "password123"));
-
-            user.ChangeSubscription("Plus");
-
-            Assert.Equal("Plus", user.SubscriptionPlan);
-        }
-
-        [Fact]
-        public void ChangeSubscription_InvalidPlan_Throws()
-        {
-            var user = new User(new SignUpCommand("usuario8", "usuario8@email.com", "password123"));
-
-            Assert.Throws<ArgumentException>(() => user.ChangeSubscription("Gold"));
-        }
-    }
 }
+    }

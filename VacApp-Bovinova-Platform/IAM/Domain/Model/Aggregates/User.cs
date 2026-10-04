@@ -25,9 +25,6 @@ namespace VacApp_Bovinova_Platform.IAM.Domain.Model.Aggregates
         public string Email { get; private set; }
 
         [Required]
-        public string SubscriptionPlan { get; private set; } = SubscriptionPlans.Free;
-
-        [Required]
         public UserRole Role { get; private set; } = UserRole.Rancher;
 
         private User() { }
@@ -52,12 +49,5 @@ namespace VacApp_Bovinova_Platform.IAM.Domain.Model.Aggregates
                 Password = command.Password;
         }
 
-        public void ChangeSubscription(string plan)
-        {
-            if (!SubscriptionPlans.IsValid(plan))
-                throw new ValidationException($"Plan de suscripción inválido: '{plan}'.");
-
-            SubscriptionPlan = plan;
-        }
     }
 }

@@ -27,7 +27,7 @@ namespace VacApp.Tests.UnitTests
             var command = new CreateStableCommand("Establo 2", 0, 2);
 
             // Act & Assert
-            Assert.Throws<ArgumentException>(() => new Stable(command));
+            Assert.Throws<VacApp_Bovinova_Platform.Shared.Domain.Model.Exceptions.ValidationException>(() => new Stable(command));
         }
 
         [Fact]
@@ -37,7 +37,7 @@ namespace VacApp.Tests.UnitTests
             var command = new CreateStableCommand("", 5, 3);
 
             // Act & Assert
-            Assert.Throws<ArgumentException>(() => new Stable(command));
+            Assert.Throws<VacApp_Bovinova_Platform.Shared.Domain.Model.Exceptions.ValidationException>(() => new Stable(command));
         }
 
         [Fact]
@@ -63,7 +63,7 @@ namespace VacApp.Tests.UnitTests
             var updateCommand = new UpdateStableCommand(1, "Establo 4", 0);
 
             // Act & Assert
-            Assert.Throws<ArgumentException>(() => stable.Update(updateCommand));
+            Assert.Throws<VacApp_Bovinova_Platform.Shared.Domain.Model.Exceptions.ValidationException>(() => stable.Update(updateCommand));
         }
     }
 }

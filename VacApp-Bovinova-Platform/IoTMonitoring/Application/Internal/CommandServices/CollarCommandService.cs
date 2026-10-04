@@ -1,4 +1,3 @@
-using VacApp_Bovinova_Platform.IoTMonitoring.Application.ACL;
 using VacApp_Bovinova_Platform.IoTMonitoring.Domain.Model;
 using VacApp_Bovinova_Platform.IoTMonitoring.Domain.Model.Aggregates;
 using VacApp_Bovinova_Platform.IoTMonitoring.Domain.Model.Commands;
@@ -18,20 +17,12 @@ namespace VacApp_Bovinova_Platform.IoTMonitoring.Application.Internal.CommandSer
 /// </summary>
 public class CollarCommandService(
     ICollarRepository collarRepository,
-    ISubscriptionContextFacade subscriptionContext,
     IBovineQueryService bovineQueryService,
     IUnitOfWork unitOfWork)
     : ICollarCommandService
 {
     public async Task<Collar> Handle(RegisterCollarCommand command)
     {
-        var allowance     = await subscriptionContext.GetCollarAllowanceAsync(command.UserId);
-        var activeCollars = await collarRepository.CountActiveByUserIdAsync(command.UserId);
-
-        if (activeCollars >= allowance)
-            throw new InvalidOperationException(
-                $"Collar allowance reached ({activeCollars}/{allowance}). " +
-                "Request an additional collar to raise your allowance.");
 
         if (await collarRepository.ExistsByDeviceIdAsync(command.DeviceId))
             throw new DuplicateCollarException(command.DeviceId);

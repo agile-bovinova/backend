@@ -33,7 +33,7 @@ namespace VacApp.Tests.UnitTests
             var command = new CreateBovineCommand("Bovi", "other", birthDate, "Angus", 1, "img.jpg", 10, null);
 
             // Act & Assert
-            Assert.Throws<ArgumentException>(() => new Bovine(command));
+            Assert.Throws<VacApp_Bovinova_Platform.Shared.Domain.Model.Exceptions.ValidationException>(() => new Bovine(command));
         }
 
         [Fact]
@@ -65,7 +65,7 @@ namespace VacApp.Tests.UnitTests
             var updateCommand = new UpdateBovineCommand(1, null, "other", null, null, null, null);
 
             // Act & Assert
-            Assert.Throws<ArgumentException>(() => bovine.Update(updateCommand));
+            Assert.Throws<VacApp_Bovinova_Platform.Shared.Domain.Model.Exceptions.ValidationException>(() => bovine.Update(updateCommand));
         }
     }
 }

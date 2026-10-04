@@ -8,7 +8,6 @@ namespace VacApp_Bovinova_Platform.IAM.Domain.Services
         Task<string> Handle(SignUpCommand command);
         Task<string> Handle(SignInCommand command);
         Task<User?> Handle(UpdateUserCommand command);
-        Task<User?> Handle(ChangeSubscriptionCommand command);
 
         /// <summary>RF-03 step 1: emails a recovery code. Never throws for unknown emails.</summary>
         Task Handle(RequestPasswordResetCommand command);

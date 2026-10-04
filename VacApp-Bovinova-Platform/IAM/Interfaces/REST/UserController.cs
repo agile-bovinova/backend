@@ -115,7 +115,7 @@ namespace VacApp_Bovinova_Platform.IAM.Interfaces.REST
             var accessLevel = staffAccess is null ? "Owner" : staffAccess.AccessLevel.ToString();
             var canEdit = staffAccess is null || staffAccess.AccessLevel >= StaffAccessLevel.Editor;
             var canManageStaff = staffAccess is null || staffAccess.AccessLevel == StaffAccessLevel.Manager;
-            var canManageSubscription = staffAccess is null;
+            var canManageSubscription = false;
 
             // Total de bovinos
             var bovines = await bovineQueryService.Handle(new GetAllBovinesQuery(effectiveUserId));
@@ -150,14 +150,12 @@ namespace VacApp_Bovinova_Platform.IAM.Interfaces.REST
                     user.Id,
                     user.Username,
                     user.Email,
-                    owner.SubscriptionPlan,
                     isStaff,
                     effectiveUserId,
                     accessLevel,
                     true,
                     canEdit,
                     canManageStaff,
-                    canManageSubscription,
                     totalBovines,
                     totalCampaigns,
                     totalStaff,
@@ -184,37 +182,5 @@ namespace VacApp_Bovinova_Platform.IAM.Interfaces.REST
             return Ok(userResource);
         }
 
-        [HttpPut("subscription")]
-        [SwaggerResponse(StatusCodes.Status200OK, "Subscription updated")]
-        public async Task<IActionResult> UpdateSubscription([FromBody] UpdateSubscriptionResource resource)
-        {
-            var user = HttpContext.Items["User"] as User;
-
-            if (user is null)
-                return Unauthorized("User not found in context.");
-
-            // Subscription is owner-only: staff of any level must not manage it.
-            if (await staffAccessService.IsStaffAsync(user))
-                return StatusCode(StatusCodes.Status403Forbidden,
-                    new { message = "Only the ranch owner can manage the subscription." });
-
-            try
-            {
-                var command = ChangeSubscriptionCommandFromResourceAssembler.ToCommandFromResource(resource, user.Id);
-                var updatedUser = await commandService.Handle(command);
-
-                if (updatedUser is null) return NotFound("User not found.");
-
-                return Ok(new
-                {
-                    message = "Subscription updated",
-                    subscription = updatedUser.SubscriptionPlan
-                });
-            }
-            catch (ArgumentException e)
-            {
-                return BadRequest(e.Message);
-            }
-        }
     }
 }

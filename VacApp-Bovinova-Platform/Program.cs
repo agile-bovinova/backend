@@ -48,19 +48,6 @@ using VacApp_Bovinova_Platform.IoTMonitoring.Domain.Repositories;
 using VacApp_Bovinova_Platform.IoTMonitoring.Domain.Services;
 using VacApp_Bovinova_Platform.IoTMonitoring.Infrastructure.Persistence.EFC.Repositories;
 using VacApp_Bovinova_Platform.IoTMonitoring.Infrastructure.Messaging;
-using VacApp_Bovinova_Platform.IoTMonitoring.Application.ACL;
-using VacApp_Bovinova_Platform.IoTMonitoring.Infrastructure.ACL;
-using VacApp_Bovinova_Platform.SubscriptionManagement.Application.Internal.CommandServices;
-using VacApp_Bovinova_Platform.SubscriptionManagement.Application.Internal.QueryServices;
-using VacApp_Bovinova_Platform.SubscriptionManagement.Domain.Repositories;
-using VacApp_Bovinova_Platform.SubscriptionManagement.Domain.Services;
-using VacApp_Bovinova_Platform.SubscriptionManagement.Infrastructure.Persistence.EFC.Repositories;
-using VacApp_Bovinova_Platform.SubscriptionManagement.Application.ACL;
-using VacApp_Bovinova_Platform.SubscriptionManagement.Infrastructure.ACL;
-using VacApp_Bovinova_Platform.SubscriptionManagement.Application.Outbound;
-using VacApp_Bovinova_Platform.SubscriptionManagement.Infrastructure.Email;
-using VacApp_Bovinova_Platform.SubscriptionManagement.Infrastructure.PaymentGateway;
-using VacApp_Bovinova_Platform.SubscriptionManagement.Infrastructure.Reminders;
 using VacApp_Bovinova_Platform.Shared.Infrastructure.Media.Local;
 
 DotEnv.Load();
@@ -220,24 +207,12 @@ builder.Services.AddScoped<IBovineHealthRecordQueryService, BovineHealthRecordQu
 builder.Services.AddScoped<ICollarRepository, CollarRepository>();
 builder.Services.AddScoped<ICollarCommandService, CollarCommandService>();
 builder.Services.AddScoped<ICollarQueryService, CollarQueryService>();
-builder.Services.AddScoped<ISubscriptionContextFacade, SubscriptionContextFacade>();
 
-// Subscription Management BC
-builder.Services.AddScoped<ISubscriptionRepository, SubscriptionRepository>();
-builder.Services.AddScoped<IAdditionalCollarRequestRepository, AdditionalCollarRequestRepository>();
-builder.Services.AddScoped<IPaymentRepository, PaymentRepository>();
 
 // Mock payment gateway (no external provider).
-builder.Services.AddScoped<IPaymentGateway, MockPaymentGateway>();
-builder.Services.AddScoped<IPaymentCommandService, PaymentCommandService>();
 
 // Receipt email: Resend when an API key is configured, else a no-op logger so the
 // demo runs without external config. RESEND_TO_OVERRIDE pins the recipient in test mode.
-if (!string.IsNullOrWhiteSpace(Environment.GetEnvironmentVariable("RESEND_API_KEY")))
-    builder.Services.AddHttpClient<IEmailSender, ResendEmailSender>();
-else
-    builder.Services.AddScoped<IEmailSender, LogEmailSender>();
-
 // Background push (OneSignal): real delivery when ONESIGNAL_REST_API_KEY is configured,
 // else a no-op logger so the demo runs without external config. OneSignal wraps FCM/APNs,
 // so the backend targets the user by external-id alias and stores no device tokens.
@@ -247,12 +222,6 @@ else
     builder.Services.AddScoped<IPushNotificationService, LogPushSender>();
 
 // Daily billing sweep: pre-renewal reminders (10/5 days) + suspend overdue-unpaid Plus.
-builder.Services.AddScoped<IPaymentReminderService, PaymentReminderService>();
-builder.Services.AddScoped<ISubscriptionSuspensionService, SubscriptionSuspensionService>();
-builder.Services.AddHostedService<PaymentReminderBackgroundService>();
-builder.Services.AddScoped<ISubscriptionCommandService, SubscriptionCommandService>();
-builder.Services.AddScoped<ISubscriptionQueryService, SubscriptionQueryService>();
-builder.Services.AddScoped<ICollarLifecycleFacade, CollarLifecycleFacade>();
 
 // MQTT telemetry ingestion (CON2: collar communicates exclusively over MQTT)
 builder.Services.AddSingleton(new MqttSettings
@@ -280,6 +249,7 @@ builder.Services.AddMediatR(cfg =>
 
 
 /////////////////////////End Database Configuration/////////////////////////
+builder.Services.AddScoped<VacApp_Bovinova_Platform.Shared.Application.Outbound.IEmailSender, VacApp_Bovinova_Platform.Shared.Infrastructure.Email.LogEmailSender>();
 var app = builder.Build();
 
 // Verify Database Objects are created
