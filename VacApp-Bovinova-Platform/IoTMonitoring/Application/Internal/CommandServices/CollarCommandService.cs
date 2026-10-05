@@ -10,10 +10,9 @@ using VacApp_Bovinova_Platform.Shared.Domain.Repositories;
 namespace VacApp_Bovinova_Platform.IoTMonitoring.Application.Internal.CommandServices;
 
 /// <summary>
-/// Plan gating (active Plus) is enforced at the controller via [RequiresPlus];
-/// this service enforces capacity, ownership and uniqueness invariants.
-/// Collar allowance (3 included + approved additional requests) comes from the
-/// SubscriptionManagement BC via an anti-corruption facade.
+/// Enforces capacity, ownership and uniqueness invariants. MVP: there are no
+/// plans or billing, so every owner gets a fixed allowance of
+/// <see cref="Collar.MaxCollarsPerOwner"/> active collars.
 /// </summary>
 public class CollarCommandService(
     ICollarRepository collarRepository,
@@ -29,6 +28,10 @@ public class CollarCommandService(
 
         if (await collarRepository.ExistsActiveByBovineIdAsync(command.BovineId))
             throw new InvalidOperationException($"Bovine {command.BovineId} already has a collar assigned.");
+
+        if (await collarRepository.CountActiveByUserIdAsync(command.UserId) >= Collar.MaxCollarsPerOwner)
+            throw new InvalidOperationException(
+                $"Collar allowance reached ({Collar.MaxCollarsPerOwner} active collars).");
 
         // Ownership: the bovine must belong to the requesting user.
         var bovine = await bovineQueryService.Handle(new GetBovinesByIdQuery(command.BovineId));
