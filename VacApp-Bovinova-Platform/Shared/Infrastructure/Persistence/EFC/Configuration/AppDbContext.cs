@@ -78,10 +78,11 @@ public class AppDbContext : DbContext
         builder.Entity<Bovine>().HasKey(f => f.Id);
         builder.Entity<Bovine>().Property(f => f.Id).IsRequired().ValueGeneratedOnAdd();
         builder.Entity<Bovine>().Property(f => f.Name).IsRequired();
+        builder.Entity<Bovine>().Property(f => f.Code).HasMaxLength(50);
         builder.Entity<Bovine>().Property(f => f.Gender).IsRequired();
         builder.Entity<Bovine>().Property(f => f.BirthDate).IsRequired();
         builder.Entity<Bovine>().Property(f => f.Breed).IsRequired();
-        builder.Entity<Bovine>().Property(f => f.BovineImg).IsRequired();
+        builder.Entity<Bovine>().Property(f => f.BovineImg).HasColumnType("text").IsRequired();
         builder.Entity<Bovine>().Property(f => f.StableId).IsRequired();
         builder.Entity<Bovine>().Property(f => f.UserId).HasColumnName("user_id").IsRequired();
         builder.Entity<Bovine>().Property(f => f.MinTemperature).IsRequired();
@@ -212,7 +213,7 @@ public class DateOnlyConverter : ValueConverter<DateOnly, DateTime>
 {
     public DateOnlyConverter()
         : base(
-            d => d.ToDateTime(TimeOnly.MinValue),
+            d => DateTime.SpecifyKind(d.ToDateTime(TimeOnly.MinValue), DateTimeKind.Utc),
             d => DateOnly.FromDateTime(d))
     { }
 }

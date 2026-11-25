@@ -21,6 +21,7 @@ public class UpdateBovineResource
     public DateOnly BirthDate { get; set; }
     [Required]
     public string Breed { get; set; }
+    public string? Code { get; set; }
     public int StableId { get; set; }
     [Range(30.0, 45.0, ErrorMessage = "La temperatura debe estar entre 30°C y 45°C")]
     public double? MinTemperature { get; set; }

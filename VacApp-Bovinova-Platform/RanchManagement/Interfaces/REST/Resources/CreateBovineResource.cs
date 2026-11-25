@@ -11,6 +11,7 @@ public record CreateBovineResource(
     [Required]
     IFormFile FileData,
     int StableId,
+    string? Code = null,
     [Range(30.0, 45.0, ErrorMessage = "La temperatura debe estar entre 30°C y 45°C")]
     double MinTemperature = 38.0,
 

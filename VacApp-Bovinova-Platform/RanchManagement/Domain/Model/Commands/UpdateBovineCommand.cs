@@ -6,6 +6,7 @@ public record UpdateBovineCommand(
     string? Gender = null,
     DateOnly? BirthDate = null,
     string? Breed = null,
+    string? Code = null,
     int? UserId = null,
     int? StableId = null,
     double? MinTemperature = null,

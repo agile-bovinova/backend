@@ -18,7 +18,8 @@ public static class BovineResourceFromEntityAssembler
             entity.MinTemperature,
             entity.MaxTemperature,
             entity.MinHeartRate,
-            entity.MaxHeartRate
+            entity.MaxHeartRate,
+            entity.Code ?? $"BOV-{entity.Id:D3}"
         );
     }
 }

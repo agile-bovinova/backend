@@ -14,6 +14,7 @@ public static class CreateBovineCommandFromResourceAssembler
             string.Empty,
             userId,
             resource.FileData.OpenReadStream(),
+            resource.Code,
             resource.MinTemperature,
             resource.MaxTemperature,
             resource.MinHeartRate,

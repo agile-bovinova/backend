@@ -9,6 +9,7 @@ public record CreateBovineCommand(
     string BovineImg,
     int UserId,
     Stream FileData,
+    string? Code = null,
     double MinTemperature = 0,
     double MaxTemperature = 0,
     int MinHeartRate = 0,

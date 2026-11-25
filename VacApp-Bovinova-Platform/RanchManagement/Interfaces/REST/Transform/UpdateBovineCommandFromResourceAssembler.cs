@@ -14,6 +14,7 @@ public static class UpdateBovineCommandFromResourceAssembler
             Gender: resource.Gender,
             BirthDate: resource.BirthDate,
             Breed: resource.Breed,
+            Code: resource.Code,
             StableId: resource.StableId,
             MinTemperature: resource.MinTemperature,
             MaxTemperature: resource.MaxTemperature,

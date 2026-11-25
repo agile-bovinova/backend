@@ -14,6 +14,9 @@ public class Bovine
     [StringLength(100)]
     public string Name { get; private set; }
 
+    [StringLength(50)]
+    public string? Code { get; private set; }
+
     [Required]
     [StringLength(100)]
     public string Gender { get; private set; }
@@ -32,7 +35,6 @@ public class Bovine
     public Stable? Stable { get; private set; }
 
     [Required]
-    [StringLength(300)]
     public string BovineImg { get; private set; }
 
     public int UserId { get; set; }
@@ -82,6 +84,7 @@ public class Bovine
             throw new ValidationException("El género debe ser 'male' o 'female'.");
 
         Name = command.Name;
+        Code = string.IsNullOrWhiteSpace(command.Code) ? null : command.Code;
         Gender = command.Gender;
         BirthDate = command.BirthDate;
         Breed = command.Breed;
@@ -99,6 +102,7 @@ public class Bovine
     public void Update(UpdateBovineCommand command)
     {
         if (command.Name is not null) Name = command.Name;
+        if (command.Code is not null) Code = command.Code;
         if (command.Gender is not null)
         {
             if (!command.Gender.ToLower().Equals("male") && !command.Gender.ToLower().Equals("female"))

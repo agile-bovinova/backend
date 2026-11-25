@@ -98,35 +98,37 @@ builder.Services.AddSwaggerGen(
 
 /////////////////////////Begin Database Configuration/////////////////////////
 
-var connectionString = $"Server={Environment.GetEnvironmentVariable("DB_HOST")};" +
-                       $"Port={Environment.GetEnvironmentVariable("DB_PORT")};" +
-                       $"Database={Environment.GetEnvironmentVariable("DB_NAME")};" +
-                       $"User={Environment.GetEnvironmentVariable("DB_USER")};" +
-                       $"Password={Environment.GetEnvironmentVariable("DB_PASS")};" +
-                       $"SslMode={Environment.GetEnvironmentVariable("DB_SSL_MODE") ?? "none"};" +
-                       $"AllowPublicKeyRetrieval={Environment.GetEnvironmentVariable("DB_ALLOW_PUBLIC_KEY_RETRIEVAL") ?? "false"};";
+var dbProvider = Environment.GetEnvironmentVariable("DB_PROVIDER") ?? "postgres";
+var dbHost = Environment.GetEnvironmentVariable("DB_HOST") ?? "localhost";
+var dbPort = Environment.GetEnvironmentVariable("DB_PORT") ?? (dbProvider.Equals("postgres", StringComparison.OrdinalIgnoreCase) ? "5432" : "3306");
+var dbName = Environment.GetEnvironmentVariable("DB_NAME") ?? "vacapp";
+var dbUser = Environment.GetEnvironmentVariable("DB_USER") ?? "root";
+var dbPass = Environment.GetEnvironmentVariable("DB_PASS") ?? "root";
 
-// Verify Database Connection string
-if (string.IsNullOrEmpty(connectionString))
-    throw new Exception("Database connection string is not set in .env");
+builder.Services.AddDbContext<AppDbContext>(options =>
+{
+    if (dbProvider.Equals("postgres", StringComparison.OrdinalIgnoreCase) || dbProvider.Equals("postgresql", StringComparison.OrdinalIgnoreCase))
+    {
+        var pgConn = $"Host={dbHost};Port={dbPort};Database={dbName};Username={dbUser};Password={dbPass};Include Error Detail=true;";
+        options.UseNpgsql(pgConn);
+    }
+    else
+    {
+        var mySqlConn = $"Server={dbHost};Port={dbPort};Database={dbName};User={dbUser};Password={dbPass};SslMode={Environment.GetEnvironmentVariable("DB_SSL_MODE") ?? "none"};AllowPublicKeyRetrieval={Environment.GetEnvironmentVariable("DB_ALLOW_PUBLIC_KEY_RETRIEVAL") ?? "false"};";
+        options.UseMySQL(mySqlConn);
+    }
 
-// Configure Database Context and Logging Levels
-if (builder.Environment.IsDevelopment())
-{
-    builder.Services.AddDbContext<AppDbContext>(options =>
-        options.UseMySQL(connectionString)
-               .EnableSensitiveDataLogging()
-               .EnableDetailedErrors()
-    );
-}
-else if (builder.Environment.IsProduction())
-{
-    builder.Services.AddDbContext<AppDbContext>(options =>
-        options.UseMySQL(connectionString)
-               .LogTo(Console.WriteLine, LogLevel.Error)
-               .EnableDetailedErrors()
-    );
-}
+    if (builder.Environment.IsDevelopment())
+    {
+        options.EnableSensitiveDataLogging()
+               .EnableDetailedErrors();
+    }
+    else if (builder.Environment.IsProduction())
+    {
+        options.LogTo(Console.WriteLine, LogLevel.Error)
+               .EnableDetailedErrors();
+    }
+});
 
 // Add CORS Policy
 builder.Services.AddCors(options =>
@@ -141,14 +143,7 @@ builder.Services.AddCors(options =>
 
 // Shared Bounded Context Injection Configuration
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
-builder.Services.AddScoped<IMediaStorageService>(_ =>
-{
-    var cloudinaryUrl = Environment.GetEnvironmentVariable("CLOUDINARY_URL");
-    var useLocalMediaStorage = string.IsNullOrWhiteSpace(cloudinaryUrl) ||
-                               cloudinaryUrl.Contains("dummy", StringComparison.OrdinalIgnoreCase);
-
-    return useLocalMediaStorage ? new LocalMediaStorageService() : new CloudinaryService();
-});
+builder.Services.AddScoped<IMediaStorageService, VacApp_Bovinova_Platform.Shared.Infrastructure.Media.Base64.Base64MediaStorageService>();
 
 //IAM
 builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -157,7 +152,13 @@ builder.Services.AddScoped<IUserCommandService, UserCommandService>();
 builder.Services.AddScoped<IUserQueryService, UserQueryService>();
 builder.Services.AddScoped<IHashingService, HashingService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
-builder.Services.Configure<TokenSettings>(builder.Configuration.GetSection("TokenSettings"));
+builder.Services.Configure<TokenSettings>(options =>
+{
+    builder.Configuration.GetSection("TokenSettings").Bind(options);
+    var jwtSecret = Environment.GetEnvironmentVariable("JWT_SECRET");
+    if (!string.IsNullOrWhiteSpace(jwtSecret))
+        options.Secret = jwtSecret;
+});
 
 //Ranch Management BC
 builder.Services.AddScoped<IBovineBreedRepository, BovineBreedRepository>();
@@ -196,6 +197,7 @@ builder.Services.AddScoped<IBovineHealthRecordQueryService, BovineHealthRecordQu
 builder.Services.AddScoped<ICollarRepository, CollarRepository>();
 builder.Services.AddScoped<ICollarCommandService, CollarCommandService>();
 builder.Services.AddScoped<ICollarQueryService, CollarQueryService>();
+builder.Services.AddScoped<IPredictiveHealthService, PredictiveHealthService>();
 
 
 // Mock payment gateway (no external provider).
@@ -246,7 +248,14 @@ using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     var context = services.GetRequiredService<AppDbContext>();
-    context.Database.Migrate();
+    if (context.Database.IsNpgsql())
+    {
+        context.Database.EnsureCreated();
+    }
+    else
+    {
+        context.Database.Migrate();
+    }
 }
 
 // Configure the HTTP request pipeline.

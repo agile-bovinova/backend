@@ -11,4 +11,5 @@ public record BovineResource(
     double MinTemperature,
     double MaxTemperature,
     int MinHeartRate,
-    int MaxHeartRate);
+    int MaxHeartRate,
+    string? Code = null);
