@@ -88,14 +88,10 @@ public class PredictiveHealthService : IPredictiveHealthService, IDisposable
             currentTemp = latest.Temperature;
             currentHr = latest.HeartRate;
 
-            // Ventana de 3 horas hacia atrás (o los últimos registros disponibles)
-            var cutoff = latest.RecordedAt.AddHours(-3);
-            var windowRecords = allRecords.Where(r => r.RecordedAt >= cutoff).ToList();
-            if (windowRecords.Count < 2)
-            {
-                // Si hay pocos en 3h, tomar los últimos 10
-                windowRecords = allRecords.Take(10).ToList();
-            }
+            // Ventana activa de telemetría reciente: para permitir demostraciones
+            // interactivas en vivo (reactividad en segundos tanto para alza como
+            // para recuperación), tomamos las últimas 6 lecturas más recientes.
+            var windowRecords = allRecords.Take(6).ToList();
 
             if (windowRecords.Count >= 2)
             {
@@ -103,7 +99,7 @@ public class PredictiveHealthService : IPredictiveHealthService, IDisposable
                 tempSlope3h = latest.Temperature - oldest.Temperature;
                 hrSlope3h = latest.HeartRate - oldest.HeartRate;
 
-                // Calcular desviación estándar
+                // Calcular desviación estándar sobre la ventana reciente
                 var temps = windowRecords.Select(r => r.Temperature).ToList();
                 double avg = temps.Average();
                 double sumSquares = temps.Sum(t => Math.Pow(t - avg, 2));
