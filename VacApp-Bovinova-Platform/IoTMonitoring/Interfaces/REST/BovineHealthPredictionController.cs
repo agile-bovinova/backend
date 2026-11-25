@@ -13,7 +13,9 @@ namespace VacApp_Bovinova_Platform.IoTMonitoring.Interfaces.REST;
 [Route("api/v1/bovines/{bovineId:int}/health-prediction")]
 [Produces(MediaTypeNames.Application.Json)]
 [Tags("Predictive AI - Animal Health")]
-public class BovineHealthPredictionController(IPredictiveHealthService predictiveHealthService)
+public class BovineHealthPredictionController(
+    IPredictiveHealthService predictiveHealthService,
+    IClinicalAdvisorService clinicalAdvisorService)
     : ControllerBase
 {
     /// <summary>
@@ -33,6 +35,26 @@ public class BovineHealthPredictionController(IPredictiveHealthService predictiv
         int userId = user?.Id ?? 1;
 
         var result = await predictiveHealthService.PredictHealthRiskAsync(bovineId, userId);
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Genera una prescripción veterinaria personalizada mediante IA cruzando la telemetría del animal con el inventario real del rancho.
+    /// Soporte dual: consulta Gemini API en la nube con respaldo local inteligente ante desconexión de red.
+    /// </summary>
+    /// <param name="bovineId">Identificador del bovino.</param>
+    /// <returns>Ficha clínica con medicamento, dosis por peso, disponibilidad en almacén y primeros auxilios físicos.</returns>
+    [AllowAnonymous]
+    [HttpGet("clinical-advice")]
+    [SwaggerResponse(StatusCodes.Status200OK, "Prescripción clínica generada exitosamente", typeof(ClinicalAdviceResource))]
+    [SwaggerResponse(StatusCodes.Status401Unauthorized, "No autorizado")]
+    [SwaggerResponse(StatusCodes.Status404NotFound, "Bovino no encontrado")]
+    public async Task<IActionResult> GetClinicalAdvice(int bovineId)
+    {
+        var user = HttpContext.Items["User"] as User;
+        int userId = user?.Id ?? 1;
+
+        var result = await clinicalAdvisorService.GenerateClinicalAdviceAsync(bovineId, userId);
         return Ok(result);
     }
 }

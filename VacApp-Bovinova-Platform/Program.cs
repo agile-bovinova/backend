@@ -197,7 +197,9 @@ builder.Services.AddScoped<IBovineHealthRecordQueryService, BovineHealthRecordQu
 builder.Services.AddScoped<ICollarRepository, CollarRepository>();
 builder.Services.AddScoped<ICollarCommandService, CollarCommandService>();
 builder.Services.AddScoped<ICollarQueryService, CollarQueryService>();
+builder.Services.AddHttpClient();
 builder.Services.AddScoped<IPredictiveHealthService, PredictiveHealthService>();
+builder.Services.AddScoped<IClinicalAdvisorService, ClinicalAdvisorService>();
 
 
 // Mock payment gateway (no external provider).
