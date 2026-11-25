@@ -32,15 +32,10 @@ namespace VacApp_Bovinova_Platform.IAM.Application.CommandServices
             if (existingUser != null)
                 throw new ConflictException("User already exists");
 
-            try
-            {
-                await userRepository.AddAsync(user);
-                await unitOfWork.CompleteAsync();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
-            }
+            // No try/catch: if the user can't be saved the error must reach the
+            // client. Swallowing it returned 201 + a token for a user that didn't exist.
+            await userRepository.AddAsync(user);
+            await unitOfWork.CompleteAsync();
 
             return tokenService.GenerateToken(user);
         }

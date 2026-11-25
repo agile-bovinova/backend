@@ -2,6 +2,7 @@ using System.Net.Mime;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using VacApp_Bovinova_Platform.IAM.Domain.Model.Aggregates;
+using VacApp_Bovinova_Platform.IoTMonitoring.Domain.Model.Aggregates;
 using VacApp_Bovinova_Platform.IAM.Infrastructure.Pipeline.Middleware.Attributes;
 using VacApp_Bovinova_Platform.IoTMonitoring.Domain.Model;
 using VacApp_Bovinova_Platform.IoTMonitoring.Domain.Model.Commands;
@@ -13,8 +14,8 @@ using VacApp_Bovinova_Platform.IoTMonitoring.Interfaces.REST.Transform;
 namespace VacApp_Bovinova_Platform.IoTMonitoring.Interfaces.REST;
 
 /// <summary>
-/// Collar registration, status and capacity. The whole controller requires the
-/// have no access to collars at all.
+/// Collar registration, status and capacity. MVP: open to every authenticated
+/// owner (no plans); capacity is a fixed allowance (Collar.MaxCollarsPerOwner).
 /// </summary>
 [Authorize]
 [ApiController]
@@ -105,7 +106,7 @@ public class CollarController(
         var effectiveUserId = user.Id;
 
         var active = await queryService.GetActiveCountAsync(effectiveUserId);
-        var allowance = 999;
+        var allowance = Collar.MaxCollarsPerOwner;
         return Ok(new CollarCapacityResource(active, allowance, Math.Max(0, allowance - active)));
     }
 

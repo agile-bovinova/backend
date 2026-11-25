@@ -12,6 +12,9 @@ public class Collar
     /// <summary>Minutes without telemetry after which a collar is considered NO_SIGNAL (TP).</summary>
     public const int SignalWindowMinutes = 10;
 
+    /// <summary>MVP (no plans/billing): active collars a ranch owner may register.</summary>
+    public const int MaxCollarsPerOwner = 3;
+
     public int                   Id              { get; private set; }
     public string                DeviceId        { get; private set; }
     public int                   BovineId        { get; private set; }
