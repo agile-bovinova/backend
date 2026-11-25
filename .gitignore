@@ -421,3 +421,4 @@ FodyWeavers.xsd
 # Built Visual Studio Code Extensions
 *.vsix
 VacApp-Bovinova-Platform/appsettings.Development.json
+.~lock.*#
