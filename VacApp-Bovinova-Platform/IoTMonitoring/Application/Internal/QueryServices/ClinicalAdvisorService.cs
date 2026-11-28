@@ -56,7 +56,7 @@ public class ClinicalAdvisorService(
         List<Product> products)
     {
         using var client = httpClientFactory.CreateClient();
-        client.Timeout = TimeSpan.FromSeconds(3.5); // Timeout rápido anti-bloqueo de campus
+        client.Timeout = TimeSpan.FromSeconds(8); // Timeout seguro para Gemini 2.5 con respaldo ante bloqueo de campus
 
         var availableProductsText = products.Count > 0
             ? string.Join(", ", products.Select(p => $"{p.Name} (Stock: {p.Quantity} {p.Unit ?? "unidades"})"))
@@ -109,15 +109,24 @@ INSTRUCCIONES CLÍNICAS:
             generationConfig = new
             {
                 temperature = 0.2,
-                responseMimeType = "application/json"
+                responseMimeType = "application/json",
+                thinkingConfig = new { thinkingBudget = 0 }
             }
         };
 
+        var model = configuration["GEMINI_MODEL"] ?? Environment.GetEnvironmentVariable("GEMINI_MODEL");
+        if (string.IsNullOrWhiteSpace(model)) model = "gemini-2.5-flash";
+
         var jsonContent = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
-        var url = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={apiKey}";
+        var url = $"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={apiKey}";
 
         var response = await client.PostAsync(url, jsonContent);
-        if (!response.IsSuccessStatusCode) return null;
+        if (!response.IsSuccessStatusCode)
+        {
+            var errBody = await response.Content.ReadAsStringAsync();
+            logger.LogWarning("Gemini API ({Model}) respondió HTTP {StatusCode}: {Body}", model, (int)response.StatusCode, errBody);
+            return null;
+        }
 
         var responseString = await response.Content.ReadAsStringAsync();
         using var doc = JsonDocument.Parse(responseString);
